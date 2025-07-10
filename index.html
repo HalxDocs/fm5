@@ -828,7 +828,7 @@
                     <input type="email" id="email" placeholder="Email" class="auth-input">
                     <input type="password" id="password" placeholder="Password" class="auth-input">
                     <button id="login-btn" class="auth-btn">Login</button>
-                    <button id="signup-btn" class="auth-btn auth-btn-secondary">Sign Up</button>
+                    <button id="signup-btn" class="auth-btn">Sign Up</button>
                     <button id="google-auth-btn" class="auth-btn auth-btn-google">
                         <i class="fab fa-google"></i> Continue with Google
                     </button>
@@ -1108,7 +1108,7 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const firebaseApp = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -1355,8 +1355,12 @@
             }
 
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
+                .then((userCredential) => {
                     showAuthMessage('Login successful!', 'success');
+                    currentUser = userCredential.user;
+                    showAppSection();
+                    updateUserInfo();
+                    loadData();
                 })
                 .catch(error => {
                     showAuthMessage(error.message, 'error');
@@ -1378,8 +1382,12 @@
             }
 
             auth.createUserWithEmailAndPassword(email, password)
-                .then(() => {
+                .then((userCredential) => {
                     showAuthMessage('Account created successfully!', 'success');
+                    currentUser = userCredential.user;
+                    showAppSection();
+                    updateUserInfo();
+                    loadData();
                 })
                 .catch(error => {
                     showAuthMessage(error.message, 'error');
@@ -1389,8 +1397,12 @@
         function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
-                .then(() => {
+                .then((result) => {
                     showAuthMessage('Google login successful!', 'success');
+                    currentUser = result.user;
+                    showAppSection();
+                    updateUserInfo();
+                    loadData();
                 })
                 .catch(error => {
                     showAuthMessage(error.message, 'error');
@@ -1399,8 +1411,12 @@
 
         function continueAsGuest() {
             auth.signInAnonymously()
-                .then(() => {
+                .then((userCredential) => {
                     showAuthMessage('Continuing as guest', 'success');
+                    currentUser = userCredential.user;
+                    showAppSection();
+                    updateUserInfo();
+                    loadData();
                 })
                 .catch(error => {
                     showAuthMessage(error.message, 'error');
@@ -1417,6 +1433,7 @@
                     currentPublisherId = null;
                     clearAllLists();
                     localStorage.removeItem('currentUser');
+                    showAuthSection();
                 })
                 .catch(error => {
                     console.error('Logout error:', error);
@@ -1814,7 +1831,7 @@
                         const contact = doc.data();
                         
                         // Check if the contact matches the search term
-                        if (contact.name.toLowerCase().includes(searchTerm) {
+                        if (contact.name.toLowerCase().includes(searchTerm)) {
                             const statusClass = `status-${contact.status || 'pending'}`;
                             
                             const contactItem = document.createElement('div');
